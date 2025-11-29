@@ -1,0 +1,48 @@
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.bin
+
+# ===== Virtual Environment =====
+.venv/
+venv/
+env/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Editor =====
+.vscode/
+.idea/
+
+# ===== HuggingFace cache =====
+~/.cache/huggingface/
+cache/
+datasets_cache/
+
+# ===== TensorBoard =====
+runs/
+
+# ===== Model checkpoints =====
+models/
+checkpoints/
+*.ckpt
+
+# ===== Data (local only) =====
+data/processed/
+data/raw/
+data/cache/
+*.arrow
+*.jsonl
+
+# ===== Logs =====
+logs/
+*.log
+
+# ===== Generated =====
+results/
+outputs/

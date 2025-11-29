@@ -1,0 +1,206 @@
+"""
+Training script for GPT-2 model with layer-wise attention masking.
+"""
+
+import os
+import json
+import torch
+import argparse
+from transformers import (
+    GPT2Tokenizer,
+    TrainingArguments,
+    Trainer,
+    DataCollatorForLanguageModeling,
+)
+from src.dataset import prepare_dataset
+from src.model.gpt2_custom import MaskedGPT2LMHeadModel
+from src.model.schedule import load_mask_schedule
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+def load_config(config_path: str = "./config/train_config.json") -> dict:
+    """Load training configuration from JSON file."""
+    with open(config_path, "r") as f:
+        config = json.load(f)
+    return config
+
+
+def setup_masked_model_and_tokenizer(
+    model_name: str = "gpt2", mask_schedule: dict = None
+):
+    """Initialize masked GPT-2 model and tokenizer."""
+    tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+    tokenizer.pad_token = tokenizer.eos_token
+
+    # Initialize custom model with masking capability
+    model = MaskedGPT2LMHeadModel.from_pretrained(
+        model_name,
+        mask_schedule=mask_schedule,
+    )
+
+    # Resize embeddings if needed
+    model.resize_token_embeddings(len(tokenizer))
+
+    return model, tokenizer
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Train masked GPT-2 model")
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="tiny_stories",
+        choices=["wikitext-103", "tiny_stories"],
+        help="Dataset to use for training",
+    )
+    parser.add_argument(
+        "--config",
+        type=str,
+        default="./config/train_config.json",
+        help="Path to training config file",
+    )
+    parser.add_argument(
+        "--schedule_config",
+        type=str,
+        default="./config/schedule_config.json",
+        help="Path to mask schedule config file",
+    )
+    parser.add_argument(
+        "--schedule",
+        type=str,
+        default="lms_main",
+        choices=["full", "half", "quarter", "aggressive", "lms_main"],
+        help="Mask schedule to use",
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default=None,
+        help="Directory to save the model",
+    )
+    parser.add_argument(
+        "--model_name",
+        type=str,
+        default="gpt2",
+        help="Base model name",
+    )
+    parser.add_argument(
+        "--resume_from_checkpoint",
+        type=str,
+        default=None,
+        help="Path to checkpoint to resume from",
+    )
+
+    args = parser.parse_args()
+
+    # Set output directory if not provided
+    if args.output_dir is None:
+        args.output_dir = f"./models/mask_gpt2/{args.schedule}"
+
+    # Load configurations
+    config = load_config(args.config)
+    mask_schedule = load_mask_schedule(args.schedule_config, args.schedule)
+
+    logger.info(f"Loaded training config: {config}")
+    logger.info(f"Using mask schedule: {args.schedule}")
+    logger.info(f"Mask schedule config: {mask_schedule}")
+
+    # Setup model and tokenizer
+    logger.info("Initializing masked model and tokenizer...")
+    model, tokenizer = setup_masked_model_and_tokenizer(args.model_name, mask_schedule)
+
+    # Print model info
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    logger.info(f"Model total parameters: {total_params:,}")
+    logger.info(f"Model trainable parameters: {trainable_params:,}")
+
+    # Prepare dataset
+    logger.info(f"Preparing {args.dataset} dataset...")
+    datasets, _ = prepare_dataset(args.dataset, config["max_length"])
+
+    # Data collator for causal language modeling
+    data_collator = DataCollatorForLanguageModeling(
+        tokenizer=tokenizer,
+        mlm=False,  # GPT-2 is causal LM, not masked LM
+    )
+
+    # NOTE: Your transformers version does not support newer arguments like
+    # `evaluation_strategy`, `save_strategy`, `report_to`, etc.
+    # To keep it compatible, we only pass a minimal, safe subset of arguments.
+    training_args = TrainingArguments(
+        output_dir=args.output_dir,
+        overwrite_output_dir=True,
+        num_train_epochs=config["num_epochs"],
+        per_device_train_batch_size=config["batch_size"],
+        per_device_eval_batch_size=config["batch_size"],
+        gradient_accumulation_steps=config["gradient_accumulation_steps"],
+        learning_rate=config["learning_rate"],
+        weight_decay=config["weight_decay"],
+        warmup_steps=config["warmup_steps"],
+        max_grad_norm=config["max_grad_norm"],
+        logging_steps=config["logging_steps"],
+        save_steps=config["save_steps"],
+        # All newer/optional fields are omitted for compatibility:
+        # - evaluation_strategy
+        # - save_strategy
+        # - load_best_model_at_end
+        # - metric_for_best_model
+        # - greater_is_better
+        # - save_total_limit
+        # - dataloader_num_workers
+        # - fp16
+        # - report_to
+        # - run_name
+        # - data_seed
+        # - remove_unused_columns
+        seed=42,
+    )
+
+    # Initialize Trainer
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        data_collator=data_collator,
+        train_dataset=datasets["train"],
+        eval_dataset=datasets["validation"],
+        tokenizer=tokenizer,
+    )
+
+    # Train model
+    logger.info(f"Starting training with {args.schedule} masking schedule...")
+    if args.resume_from_checkpoint:
+        trainer.train(resume_from_checkpoint=args.resume_from_checkpoint)
+    else:
+        trainer.train()
+
+    # Save final model and tokenizer
+    logger.info(f"Saving model to {args.output_dir}")
+    trainer.save_model()
+    tokenizer.save_pretrained(args.output_dir)
+
+    # Save configurations
+    with open(os.path.join(args.output_dir, "training_config.json"), "w") as f:
+        json.dump(config, f, indent=2)
+
+    with open(os.path.join(args.output_dir, "mask_schedule.json"), "w") as f:
+        json.dump(mask_schedule, f, indent=2)
+
+    # Evaluate on test set if available
+    if "test" in datasets:
+        logger.info("Evaluating on test set...")
+        test_results = trainer.evaluate(datasets["test"])
+        logger.info(f"Test results: {test_results}")
+
+        with open(os.path.join(args.output_dir, "test_results.json"), "w") as f:
+            json.dump(test_results, f, indent=2)
+
+    logger.info("Training completed!")
+
+
+if __name__ == "__main__":
+    main()

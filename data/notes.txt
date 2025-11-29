@@ -1,0 +1,35 @@
+# Data Directory Notes
+
+## Raw Data
+- `raw/` directory contains original datasets:
+  - WikiText-103: Large-scale language modeling dataset
+  - TinyStories: Small-scale dataset for quick experiments
+
+## Processed Data
+- `processed/` directory contains tokenized and cached datasets:
+  - Tokenized using GPT-2 tokenizer
+  - Preprocessed sequences of length 1024
+  - Cached for faster loading during training
+
+## Dataset Sources
+- WikiText-103: https://blog.salesforceairesearch.com/the-wikitext-long-term-dependency-language-modeling-dataset/
+- TinyStories: https://huggingface.co/datasets/roneneldan/TinyStories
+
+## Usage
+Run the dataset preparation script to download and process the datasets:
+```bash
+python src/dataset.py --dataset wikitext-103 --max_length 1024
+python src/dataset.py --dataset tiny_stories --max_length 1024
+```
+
+## Directory Structure
+```
+data/
+├── raw/
+│   ├── wikitext-103/
+│   └── tiny_stories/
+├── processed/
+│   ├── wikitext-103_tokenized/
+│   └── tiny_stories_tokenized/
+└── notes.txt
+```

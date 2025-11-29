@@ -1,0 +1,861 @@
+{
+  "schedules": {
+    "full": {
+      "schedule_name": "full",
+      "description": "Full attention without masking",
+      "layers": {
+        "0": {
+          "layer_idx": 0,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "1": {
+          "layer_idx": 1,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "2": {
+          "layer_idx": 2,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "3": {
+          "layer_idx": 3,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "4": {
+          "layer_idx": 4,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "5": {
+          "layer_idx": 5,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "6": {
+          "layer_idx": 6,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "7": {
+          "layer_idx": 7,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "8": {
+          "layer_idx": 8,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "9": {
+          "layer_idx": 9,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "10": {
+          "layer_idx": 10,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "11": {
+          "layer_idx": 11,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        }
+      },
+      "mask_patterns": {}
+    },
+    "half": {
+      "schedule_name": "half",
+      "description": "Progressive masking in later 6 layers",
+      "layers": {
+        "0": {
+          "layer_idx": 0,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "1": {
+          "layer_idx": 1,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "2": {
+          "layer_idx": 2,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "3": {
+          "layer_idx": 3,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "4": {
+          "layer_idx": 4,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "5": {
+          "layer_idx": 5,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "6": {
+          "layer_idx": 6,
+          "window_size": 256,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "7": {
+          "layer_idx": 7,
+          "window_size": 128,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "8": {
+          "layer_idx": 8,
+          "window_size": 64,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "9": {
+          "layer_idx": 9,
+          "window_size": 32,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "10": {
+          "layer_idx": 10,
+          "window_size": 16,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "11": {
+          "layer_idx": 11,
+          "window_size": 16,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        }
+      },
+      "mask_patterns": {}
+    },
+    "quarter": {
+      "schedule_name": "quarter",
+      "description": "Progressive masking from layer 3 onwards",
+      "layers": {
+        "0": {
+          "layer_idx": 0,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "1": {
+          "layer_idx": 1,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "2": {
+          "layer_idx": 2,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "3": {
+          "layer_idx": 3,
+          "window_size": 512,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "4": {
+          "layer_idx": 4,
+          "window_size": 256,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "5": {
+          "layer_idx": 5,
+          "window_size": 128,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "6": {
+          "layer_idx": 6,
+          "window_size": 64,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "7": {
+          "layer_idx": 7,
+          "window_size": 32,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "8": {
+          "layer_idx": 8,
+          "window_size": 16,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "9": {
+          "layer_idx": 9,
+          "window_size": 8,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "10": {
+          "layer_idx": 10,
+          "window_size": 4,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "11": {
+          "layer_idx": 11,
+          "window_size": 4,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        }
+      },
+      "mask_patterns": {}
+    },
+    "aggressive": {
+      "schedule_name": "aggressive",
+      "description": "Early and aggressive masking from layer 1",
+      "layers": {
+        "0": {
+          "layer_idx": 0,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "1": {
+          "layer_idx": 1,
+          "window_size": 512,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "2": {
+          "layer_idx": 2,
+          "window_size": 256,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "3": {
+          "layer_idx": 3,
+          "window_size": 128,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "4": {
+          "layer_idx": 4,
+          "window_size": 64,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "5": {
+          "layer_idx": 5,
+          "window_size": 32,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "6": {
+          "layer_idx": 6,
+          "window_size": 16,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "7": {
+          "layer_idx": 7,
+          "window_size": 8,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "8": {
+          "layer_idx": 8,
+          "window_size": 4,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "9": {
+          "layer_idx": 9,
+          "window_size": 2,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "10": {
+          "layer_idx": 10,
+          "window_size": 1,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "11": {
+          "layer_idx": 11,
+          "window_size": 1,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        }
+      },
+      "mask_patterns": {}
+    },
+    "block_sparse": {
+      "schedule_name": "block_sparse",
+      "description": "Block sparse attention pattern",
+      "layers": {
+        "0": {
+          "layer_idx": 0,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "1": {
+          "layer_idx": 1,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "2": {
+          "layer_idx": 2,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "3": {
+          "layer_idx": 3,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "4": {
+          "layer_idx": 4,
+          "window_size": null,
+          "mask_type": "block_sparse",
+          "block_size": 128,
+          "num_blocks": 4,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "5": {
+          "layer_idx": 5,
+          "window_size": null,
+          "mask_type": "block_sparse",
+          "block_size": 64,
+          "num_blocks": 4,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "6": {
+          "layer_idx": 6,
+          "window_size": null,
+          "mask_type": "block_sparse",
+          "block_size": 42,
+          "num_blocks": 4,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "7": {
+          "layer_idx": 7,
+          "window_size": null,
+          "mask_type": "block_sparse",
+          "block_size": 32,
+          "num_blocks": 4,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "8": {
+          "layer_idx": 8,
+          "window_size": null,
+          "mask_type": "block_sparse",
+          "block_size": 32,
+          "num_blocks": 4,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "9": {
+          "layer_idx": 9,
+          "window_size": null,
+          "mask_type": "block_sparse",
+          "block_size": 32,
+          "num_blocks": 4,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "10": {
+          "layer_idx": 10,
+          "window_size": null,
+          "mask_type": "block_sparse",
+          "block_size": 32,
+          "num_blocks": 4,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "11": {
+          "layer_idx": 11,
+          "window_size": null,
+          "mask_type": "block_sparse",
+          "block_size": 32,
+          "num_blocks": 4,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        }
+      },
+      "mask_patterns": {}
+    },
+    "lms_main": {
+      "schedule_name": "lms_main",
+      "description": "Layer-wise Mask Scheduling: Full / Half / Quarter pattern with shifted groups.",
+      "layers": {
+        "0": {
+          "layer_idx": 0,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "1": {
+          "layer_idx": 1,
+          "window_size": 256,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 2
+        },
+        "2": {
+          "layer_idx": 2,
+          "window_size": 256,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 1,
+          "num_groups": 2
+        },
+        "3": {
+          "layer_idx": 3,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "4": {
+          "layer_idx": 4,
+          "window_size": 128,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 4
+        },
+        "5": {
+          "layer_idx": 5,
+          "window_size": 128,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 1,
+          "num_groups": 4
+        },
+        "6": {
+          "layer_idx": 6,
+          "window_size": 128,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 2,
+          "num_groups": 4
+        },
+        "7": {
+          "layer_idx": 7,
+          "window_size": 128,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 3,
+          "num_groups": 4
+        },
+        "8": {
+          "layer_idx": 8,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        },
+        "9": {
+          "layer_idx": 9,
+          "window_size": 256,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 2
+        },
+        "10": {
+          "layer_idx": 10,
+          "window_size": 256,
+          "mask_type": "sliding_window",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 1,
+          "num_groups": 2
+        },
+        "11": {
+          "layer_idx": 11,
+          "window_size": null,
+          "mask_type": "none",
+          "block_size": null,
+          "num_blocks": null,
+          "stride": null,
+          "sparsity": null,
+          "group_idx": 0,
+          "num_groups": 1
+        }
+      },
+      "mask_patterns": {}
+    }
+  },
+  "default_schedule": "lms_main",
+  "mask_patterns": {
+    "sliding_window": {
+      "description": "Sliding window attention pattern",
+      "parameters": {
+        "stride": 1,
+        "overlap": 0.1
+      }
+    },
+    "block_sparse": {
+      "description": "Block sparse attention pattern",
+      "parameters": {
+        "block_size": 64,
+        "num_blocks": 4
+      }
+    },
+    "strided": {
+      "description": "Strided attention pattern",
+      "parameters": {
+        "stride": 2
+      }
+    }
+  }
+}

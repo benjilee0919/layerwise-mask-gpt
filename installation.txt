@@ -1,0 +1,305 @@
+# Installation Guide for Layer-wise Attention Masking GPT-2
+
+## System Requirements
+
+### Hardware Requirements
+- **CPU**: Multi-core processor (Intel i7/i9 or AMD Ryzen 7/9 recommended)
+- **Memory**: Minimum 16GB RAM (32GB recommended for large datasets)
+- **Storage**: At least 50GB free disk space (for datasets, models, and checkpoints)
+- **GPU** (optional but recommended): NVIDIA GPU with CUDA support
+  - Minimum: GTX 1080Ti (11GB VRAM)
+  - Recommended: RTX 3080/3090, RTX 4080/4090, or V100/A100
+  - At least 12GB VRAM for comfortable training
+
+### Software Requirements
+- **Operating System**: Windows 10/11, macOS 10.14+, or Linux (Ubuntu 18.04+)
+- **Python**: Version 3.8, 3.9, 3.10, or 3.11
+- **CUDA**: Version 11.7 or later (if using GPU)
+- **Git**: For cloning the repository
+
+## Installation Steps
+
+### Step 1: Python Environment Setup
+
+#### Option A: Using Anaconda/Miniconda (Recommended)
+
+1. **Install Anaconda or Miniconda**
+   - Download from https://anaconda.com or https://docs.conda.io/en/latest/miniconda.html
+   - Follow the installation instructions for your operating system
+
+2. **Create a new environment**
+   ```bash
+   conda create -n layerwise-gpt python=3.10
+   conda activate layerwise-gpt
+   ```
+
+#### Option B: Using Python venv
+
+1. **Ensure Python 3.8+ is installed**
+   ```bash
+   python --version  # Should show 3.8.x or higher
+   ```
+
+2. **Create virtual environment**
+   ```bash
+   python -m venv layerwise-gpt-env
+   ```
+
+3. **Activate the environment**
+   - Windows: `layerwise-gpt-env\Scripts\activate`
+   - macOS/Linux: `source layerwise-gpt-env/bin/activate`
+
+### Step 2: Clone Repository
+
+```bash
+git clone <repository-url>
+cd layerwise_mask_gpt
+```
+
+If you don't have Git installed, download the project as a ZIP file and extract it.
+
+### Step 3: Install Dependencies
+
+#### For GPU Users (CUDA-enabled)
+
+1. **Install PyTorch with CUDA support**
+   ```bash
+   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu117
+   ```
+
+2. **Install remaining dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Verify CUDA installation**
+   ```python
+   python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}, Version: {torch.version.cuda}')"
+   ```
+
+#### For CPU-Only Users
+
+1. **Install PyTorch CPU version**
+   ```bash
+   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+   ```
+
+2. **Install remaining dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Step 4: Download Datasets (Optional)
+
+The datasets will be downloaded automatically during first use, but you can pre-download them:
+
+```bash
+# Download WikiText-103 dataset
+python -c "from src.dataset import prepare_dataset; prepare_dataset('wikitext-103')"
+
+# Download TinyStories dataset  
+python -c "from src.dataset import prepare_dataset; prepare_dataset('tinystories')"
+```
+
+### Step 5: Verify Installation
+
+Run the verification script to ensure everything is working:
+
+```bash
+python -c "
+import torch
+import transformers
+import numpy as np
+import matplotlib.pyplot as plt
+from src.model.gpt2_custom import MaskedGPT2LMHeadModel
+print('✓ All dependencies installed successfully')
+print(f'✓ PyTorch version: {torch.__version__}')
+print(f'✓ Transformers version: {transformers.__version__}')
+print(f'✓ CUDA available: {torch.cuda.is_available()}')
+if torch.cuda.is_available():
+    print(f'✓ CUDA version: {torch.version.cuda}')
+    print(f'✓ GPU device: {torch.cuda.get_device_name(0)}')
+"
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. CUDA Installation Problems
+
+**Issue**: PyTorch doesn't detect CUDA despite having NVIDIA GPU
+```bash
+# Check NVIDIA driver
+nvidia-smi
+
+# Reinstall PyTorch with correct CUDA version
+pip uninstall torch torchvision
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu117
+```
+
+#### 2. Out of Memory Errors
+
+**Issue**: GPU runs out of memory during training
+```python
+# In train_config.json, reduce batch_size:
+{
+  "batch_size": 8,  # or even 4 for very limited memory
+  "gradient_accumulation_steps": 4  # to maintain effective batch size
+}
+```
+
+#### 3. Slow Dataset Loading
+
+**Issue**: First-time dataset download is very slow
+```bash
+# Use a faster mirror or download manually
+export HF_DATASETS_CACHE="./data/cache"  # Use local cache
+```
+
+#### 4. Import Errors
+
+**Issue**: Module not found errors
+```bash
+# Ensure you're in the correct directory and environment
+cd layerwise_mask_gpt
+conda activate layerwise-gpt  # or source your venv
+
+# Add project root to Python path
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+```
+
+### Advanced Configuration
+
+#### For Multi-GPU Systems
+
+If you have multiple GPUs, you can enable distributed training:
+
+```bash
+# Install additional dependencies for multi-GPU training
+pip install accelerate
+
+# Configure accelerate
+accelerate config
+```
+
+#### For Apple Silicon Macs
+
+```bash
+# Use MPS backend for Apple Silicon acceleration
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# Verify MPS is available
+python -c "import torch; print(f'MPS available: {torch.backends.mps.is_available()}')"
+```
+
+#### Memory Optimization
+
+For systems with limited RAM:
+
+```bash
+# Install memory-efficient dependencies
+pip install bitsandbytes  # For 8-bit optimizers
+pip install deepspeed     # For memory-efficient training
+```
+
+## Development Setup
+
+### For Contributors
+
+If you plan to contribute to the project:
+
+```bash
+# Install development dependencies
+pip install -e .
+pip install pre-commit black flake8 mypy pytest
+
+# Set up pre-commit hooks
+pre-commit install
+
+# Run tests
+pytest tests/
+```
+
+### IDE Configuration
+
+#### Visual Studio Code
+
+Recommended extensions:
+- Python
+- Pylance  
+- Jupyter
+- GitLens
+- Python Docstring Generator
+
+#### PyCharm
+
+Configure Python interpreter to use your virtual environment.
+
+## Performance Optimization
+
+### For Optimal Performance
+
+1. **Use SSD storage** for datasets and checkpoints
+2. **Enable mixed precision training** (automatic with newer PyTorch)
+3. **Use appropriate batch sizes** based on your GPU memory
+4. **Consider gradient checkpointing** for memory-constrained systems
+5. **Use compiled models** with `torch.compile()` (PyTorch 2.0+)
+
+### Memory Usage Guidelines
+
+| GPU Memory | Recommended Batch Size | Max Sequence Length |
+|------------|----------------------|-------------------|
+| 8GB        | 4-8                 | 512              |
+| 12GB       | 8-16                | 1024             |
+| 16GB       | 16-24               | 1024             |
+| 24GB+      | 24-32               | 2048             |
+
+## Getting Help
+
+### Documentation
+- Check the README.md for usage examples
+- Review the Jupyter notebooks for detailed walkthroughs
+- Examine the configuration files for parameter explanations
+
+### Community Support
+- Open an issue on GitHub for bug reports
+- Start a discussion for questions and feature requests
+- Check existing issues for common problems
+
+### Professional Support
+- Contact the research team for collaboration opportunities
+- Request custom implementations for specific use cases
+- Inquire about training workshops or consulting
+
+## Updating
+
+To update the project dependencies:
+
+```bash
+# Update to latest compatible versions
+pip install --upgrade -r requirements.txt
+
+# Or update specific packages
+pip install --upgrade torch transformers
+```
+
+## Uninstallation
+
+To remove the project and dependencies:
+
+```bash
+# Deactivate environment
+conda deactivate  # or deactivate for venv
+
+# Remove environment
+conda env remove -n layerwise-gpt  # for conda
+# or rm -rf layerwise-gpt-env  # for venv
+
+# Remove project directory
+rm -rf layerwise_mask_gpt
+```
+
+---
+
+**Note**: Installation time varies depending on internet connection and system specifications. Initial setup typically takes 10-30 minutes, including dependency downloads and dataset preparation.

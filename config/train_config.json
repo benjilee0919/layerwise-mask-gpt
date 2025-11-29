@@ -1,0 +1,23 @@
+{
+  "learning_rate": 5e-5,
+  "batch_size": 16,
+  "num_epochs": 3,
+  "warmup_steps": 500,
+  "weight_decay": 0.01,
+  "max_grad_norm": 1.0,
+  "eval_steps": 500,
+  "save_steps": 1000,
+  "logging_steps": 100,
+  "gradient_accumulation_steps": 1,
+  "dataloader_num_workers": 4,
+  "fp16": true,
+  "save_total_limit": 3,
+  "load_best_model_at_end": true,
+  "metric_for_best_model": "eval_loss",
+  "greater_is_better": false,
+  "evaluation_strategy": "steps",
+  "save_strategy": "steps",
+  "report_to": "tensorboard",
+  "max_length": 1024,
+  "output_dir": "./models"
+}

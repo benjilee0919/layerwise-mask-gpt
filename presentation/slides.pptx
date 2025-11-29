@@ -1,0 +1,25 @@
+% Research Presentation: Layer-wise Attention Masking in GPT-2
+% This is a placeholder for the PowerPoint presentation
+% 
+% Slides should cover:
+% 1. Title and Introduction
+% 2. Problem Statement and Motivation  
+% 3. Background on Transformer Attention
+% 4. Proposed Layer-wise Masking Approach
+% 5. Experimental Setup and Methodology
+% 6. Results: Efficiency Improvements
+% 7. Results: Performance Analysis
+% 8. Discussion and Insights
+% 9. Future Work and Conclusions
+% 10. Q&A
+%
+% Key visual elements to include:
+% - Attention pattern visualizations
+% - Performance vs efficiency trade-off plots
+% - Architecture diagrams showing layer-wise masking
+% - Comparative results tables
+% - Example attention windows for different layers
+%
+% This file serves as a placeholder that would typically be 
+% replaced with an actual PowerPoint (.pptx) file containing
+% the research presentation slides.
