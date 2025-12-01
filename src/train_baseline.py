@@ -6,12 +6,15 @@ import os
 import json
 import torch
 import argparse
+import time
+import csv
 from transformers import (
     GPT2LMHeadModel,
     GPT2Tokenizer,
     TrainingArguments,
     Trainer,
-    DataCollatorForLanguageModeling
+    default_data_collator,
+    TrainerCallback,
 )
 from src.dataset import prepare_dataset, get_dataloader
 import logging
@@ -19,6 +22,48 @@ import logging
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+class TimeLoggingCallback(TrainerCallback):
+    def __init__(self, log_path):
+        self.log_path = log_path
+        self.start_time = None
+        self._prepare_file()
+
+    def _prepare_file(self):
+        os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
+        with open(self.log_path, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["step", "epoch", "step_time_sec", "total_time_sec", "loss"])
+
+    def on_step_begin(self, args, state, control, **kwargs):
+        self.start_time = time.time()
+
+    def on_step_end(self, args, state, control, logs=None, **kwargs):
+        step_time = time.time() - self.start_time
+        total_time = state.global_step * step_time
+        with open(self.log_path, "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                state.global_step,
+                state.epoch,
+                round(step_time, 4),
+                round(total_time, 2),
+                logs.get("loss") if logs else None,
+            ])
+
+def safe_data_collator(features):
+    """Collate function that skips any examples with empty tensors."""
+    cleaned = []
+    for f in features:
+        ids = f.get("input_ids", None)
+        labels = f.get("labels", None)
+        if isinstance(ids, torch.Tensor) and isinstance(labels, torch.Tensor):
+            if ids.numel() == 0 or labels.numel() == 0:
+                continue
+            cleaned.append(f)
+    if not cleaned:
+        cleaned = features
+    return default_data_collator(cleaned)
 
 
 def load_config(config_path: str = "./config/train_config.json") -> dict:
@@ -70,39 +115,24 @@ def main():
     datasets, _ = prepare_dataset(args.dataset, config['max_length'])
     
     # Data collator for language modeling
-    data_collator = DataCollatorForLanguageModeling(
-        tokenizer=tokenizer,
-        mlm=False  # GPT-2 is causal LM, not masked LM
-    )
+    data_collator = safe_data_collator
     
     # Training arguments
     training_args = TrainingArguments(
         output_dir=args.output_dir,
         overwrite_output_dir=True,
-        num_train_epochs=config['num_epochs'],
-        per_device_train_batch_size=config['batch_size'],
-        per_device_eval_batch_size=config['batch_size'],
-        gradient_accumulation_steps=config['gradient_accumulation_steps'],
-        learning_rate=config['learning_rate'],
-        weight_decay=config['weight_decay'],
-        warmup_steps=config['warmup_steps'],
-        max_grad_norm=config['max_grad_norm'],
-        logging_steps=config['logging_steps'],
-        eval_steps=config['eval_steps'],
-        save_steps=config['save_steps'],
-        evaluation_strategy=config['evaluation_strategy'],
-        save_strategy=config['save_strategy'],
-        load_best_model_at_end=config['load_best_model_at_end'],
-        metric_for_best_model=config['metric_for_best_model'],
-        greater_is_better=config['greater_is_better'],
-        save_total_limit=config['save_total_limit'],
-        dataloader_num_workers=config['dataloader_num_workers'],
-        fp16=config['fp16'],
-        report_to=config['report_to'],
-        run_name=f"baseline_gpt2_{args.dataset}",
+        num_train_epochs=config["num_epochs"],
+        per_device_train_batch_size=config["batch_size"],
+        per_device_eval_batch_size=config["batch_size"],
+        gradient_accumulation_steps=config["gradient_accumulation_steps"],
+        learning_rate=config["learning_rate"],
+        weight_decay=config["weight_decay"],
+        warmup_steps=config["warmup_steps"],
+        max_grad_norm=config["max_grad_norm"],
+        logging_steps=config["logging_steps"],
+        save_steps=config["save_steps"],
+        save_safetensors=False,
         seed=42,
-        data_seed=42,
-        remove_unused_columns=False,
     )
     
     # Initialize trainer
@@ -110,9 +140,14 @@ def main():
         model=model,
         args=training_args,
         data_collator=data_collator,
-        train_dataset=datasets['train'],
-        eval_dataset=datasets['validation'],
-        tokenizer=tokenizer
+        train_dataset=datasets["train"],
+        eval_dataset=datasets["validation"],
+        tokenizer=tokenizer,
+        callbacks=[
+            TimeLoggingCallback(
+                log_path="./results/baseline_training_time.csv"
+            ),
+        ],
     )
     
     # Train model

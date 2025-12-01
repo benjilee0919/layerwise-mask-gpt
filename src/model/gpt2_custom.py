@@ -271,11 +271,10 @@ class MaskedGPT2Model(nn.Module):
                 if v is not None
             )
 
-        from transformers.modeling_outputs import (
-            BaseModelOutputWithPastAndCrossAttentions,
-        )
+        # Use BaseModelOutputWithPast (no cross-attentions) for maximum compatibility
+        from transformers.modeling_outputs import BaseModelOutputWithPast
 
-        return BaseModelOutputWithPastAndCrossAttentions(
+        return BaseModelOutputWithPast(
             last_hidden_state=hidden_states,
             past_key_values=presents,
             hidden_states=all_hidden_states,
@@ -371,30 +370,44 @@ class MaskedGPT2LMHeadModel(nn.Module):
         )
 
         hidden_states = transformer_outputs[0]
+        # ==== DEBUG: detect NaNs in hidden_states coming out of transformer ====
+        if torch.isnan(hidden_states).any():
+            print(f"DEBUG: NaN detected in hidden_states after transformer (LMS)")
 
         # LM head
         lm_logits = self.lm_head(hidden_states)
+        # ==== DEBUG: detect NaNs in lm_logits ====
+        if torch.isnan(lm_logits).any():
+            print(f"DEBUG: NaN detected in lm_logits before loss (LMS)")
 
         loss = None
         if labels is not None:
             shift_logits = lm_logits[..., :-1, :].contiguous()
             shift_labels = labels[..., 1:].contiguous()
 
+            # ==== DEBUG: detect NaNs BEFORE loss calculation (shift_logits/shift_labels) ====
+            if torch.isnan(shift_logits).any():
+                print(f"DEBUG: NaN detected in shift_logits before loss (LMS)")
+            if torch.isnan(shift_labels.float()).any():
+                print(f"DEBUG: NaN detected in shift_labels before loss (LMS)")
+
             loss_fct = nn.CrossEntropyLoss()
             loss = loss_fct(
                 shift_logits.view(-1, shift_logits.size(-1)),
                 shift_labels.view(-1),
             )
+            # ==== DEBUG: detect NaN in final loss ====
+            if torch.isnan(loss):
+                print(f"DEBUG: NaN detected in final loss (LMS)")
 
         if not return_dict:
             output = (lm_logits,) + transformer_outputs[1:]
             return ((loss,) + output) if loss is not None else output
 
-        from transformers.modeling_outputs import (
-            CausalLMOutputWithPastAndCrossAttentions,
-        )
+        # Use CausalLMOutputWithPast for compatibility with recent transformers
+        from transformers.modeling_outputs import CausalLMOutputWithPast
 
-        return CausalLMOutputWithPastAndCrossAttentions(
+        return CausalLMOutputWithPast(
             loss=loss,
             logits=lm_logits,
             past_key_values=transformer_outputs.past_key_values,

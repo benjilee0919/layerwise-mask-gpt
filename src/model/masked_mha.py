@@ -63,39 +63,169 @@ class MaskedMultiHeadAttention(nn.Module):
         - window_size: causal window size
         - group_idx / num_groups: group-based offset for layer-wise scheduling
         """
+        # ===========================
+        # ORIGINAL IMPLEMENTATION (COMMENTED OUT FOR REFERENCE)
+        # ===========================
+        #
+        # if window_size is None or window_size >= seq_length:
+        #     return attention_mask
+        #
+        # device = attention_mask.device
+        # window_mask = torch.zeros(
+        #     seq_length, seq_length, device=device, dtype=torch.bool
+        # )
+        #
+        # # Simple group-based shift inside the window
+        # step = max(1, window_size // max(1, num_groups))
+        # shift = group_idx * step
+        #
+        # for i in range(seq_length):
+        #     base_start = i - window_size + 1
+        #     base_end = i + 1
+        #
+        #     start = max(0, base_start + shift)
+        #     end = min(base_end + shift, i + 1)  # enforce causality (j <= i)
+        #
+        #     if start >= end:
+        #         # Fallback: at least attend to self
+        #         start = i
+        #         end = i + 1
+        #
+        #     window_mask[i, start:end] = True
+        #
+        # window_mask = window_mask.unsqueeze(0).unsqueeze(0)  # [1, 1, T, T]
+        # if attention_mask is not None:
+        #     combined_mask = attention_mask & window_mask
+        # else:
+        #     combined_mask = window_mask
+        #
+        # return combined_mask
+        #
+        # ===========================
+        # END ORIGINAL IMPLEMENTATION
+        # ===========================
+
+        # === LMS-style Sliding Window + Group Shift (Paper-Style Implementation) ===
+        #
+        # device = attention_mask.device
+        #
+        # # Compute offset based on group index (LMS scheme)
+        # # offset is a fraction of the window assigned to this group
+        # base_step = max(1, window_size // max(1, num_groups))
+        # offset = group_idx * base_step
+        #
+        # window_mask = torch.zeros(seq_length, seq_length, device=device, dtype=torch.bool)
+        #
+        # for i in range(seq_length):
+        #     # Base causal window: tokens in [i - window_size + 1, i]
+        #     base_start = i - window_size + 1
+        #     base_end = i + 1  # exclusive
+        #
+        #     # Apply vertical shift to the left boundary
+        #     shifted_start = base_start + offset
+        #
+        #     # Enforce causality: cannot attend to future tokens
+        #     final_end = base_end
+        #
+        #     # Clip to valid range
+        #     final_start = max(0, shifted_start)
+        #     final_end = min(final_end, i + 1)
+        #
+        #     # Safety: if shifting pushes us past the causal boundary,
+        #     # fall back to the original causal window
+        #     if final_start >= final_end:
+        #         final_start = max(0, base_start)
+        #         final_end = base_end
+        #
+        #     # Final safety: if still invalid, attend only to self
+        #     if final_start >= final_end:
+        #         final_start = i
+        #         final_end = i + 1
+        #
+        #     window_mask[i, final_start:final_end] = True
+
+        # window_mask = window_mask.unsqueeze(0).unsqueeze(0)
+        #
+        # if attention_mask is not None:
+        #     combined_mask = attention_mask & window_mask
+        # else:
+        #     combined_mask = window_mask
+        #
+        # return combined_mask
+
+        # === Stable Sliding Window Mask (no group shift; layer-wise window only) ===
         if window_size is None or window_size >= seq_length:
             return attention_mask
 
         device = attention_mask.device
-        window_mask = torch.zeros(
-            seq_length, seq_length, device=device, dtype=torch.bool
-        )
-
-        # Simple group-based shift inside the window
-        step = max(1, window_size // max(1, num_groups))
-        shift = group_idx * step
+        window_mask = torch.zeros(seq_length, seq_length, device=device, dtype=torch.bool)
 
         for i in range(seq_length):
-            base_start = i - window_size + 1
-            base_end = i + 1
+            # Standard causal sliding window: tokens in [i - window_size + 1, i]
+            start = i - window_size + 1
+            end = i + 1  # exclusive
 
-            start = max(0, base_start + shift)
-            end = min(base_end + shift, i + 1)  # enforce causality (j <= i)
+            # Clip to valid range and enforce causality
+            start = max(0, start)
+            end = min(end, i + 1)
 
             if start >= end:
-                # Fallback: at least attend to self
+                # Fallback: attend to self at least
                 start = i
                 end = i + 1
 
             window_mask[i, start:end] = True
 
-        window_mask = window_mask.unsqueeze(0).unsqueeze(0)  # [1, 1, T, T]
+        window_mask = window_mask.unsqueeze(0).unsqueeze(0)
+
         if attention_mask is not None:
             combined_mask = attention_mask & window_mask
         else:
             combined_mask = window_mask
 
         return combined_mask
+
+        # === Robust Sliding Window + Group Shift Mask (Stable LMS Version) ===
+        # if window_size is None or window_size >= seq_length:
+        #     return attention_mask
+        #
+        # device = attention_mask.device
+        #
+        # step = max(1, window_size // max(1, num_groups))
+        # shift = group_idx * step
+        #
+        # window_mask = torch.zeros(seq_length, seq_length, device=device, dtype=torch.bool)
+        #
+        # for i in range(seq_length):
+        #     base_start = i - window_size + 1
+        #     base_end = i + 1
+        #
+        #     shifted_start = base_start + shift
+        #     shifted_end = base_end + shift
+        #
+        #     shifted_end = min(shifted_end, i + 1)
+        #
+        #     if shifted_start >= shifted_end:
+        #         final_start = max(0, base_start)
+        #         final_end = base_end
+        #     else:
+        #         final_start = max(0, shifted_start)
+        #         final_end = shifted_end
+        #
+        #     if final_start >= final_end:
+        #         final_start = i
+        #         final_end = i + 1
+        #
+        #     window_mask[i, final_start:final_end] = True
+        #
+        # window_mask = window_mask.unsqueeze(0).unsqueeze(0)
+        #
+        # if attention_mask is not None:
+        #     combined_mask = attention_mask & window_mask
+        # else:
+        #     combined_mask = window_mask
+        #
+        # return combined_mask
 
     def _apply_block_sparse_mask(
         self,
@@ -205,7 +335,7 @@ class MaskedMultiHeadAttention(nn.Module):
                 )
 
         # Apply causal + layer-wise mask
-        mask_value = torch.finfo(attn_weights.dtype).min
+        mask_value = -1e4
         attn_weights = torch.where(causal_mask, attn_weights, mask_value)
 
         # Apply input attention_mask (padding mask)
@@ -218,12 +348,40 @@ class MaskedMultiHeadAttention(nn.Module):
         # for compatibility with HuggingFace. If you want, you can apply it
         # to attn_weights per head.
 
+        # Debug-safety guard: prevent rows with all -inf which would lead to NaNs after softmax
+        # If an entire row is -inf (i.e., no valid attention positions), set that row to zeros so
+        # the softmax becomes a uniform distribution instead of producing NaNs.
+        with torch.no_grad():
+            row_max = attn_weights.max(dim=-1, keepdim=True).values  # [batch, heads, seq, 1]
+            invalid_rows = torch.isinf(row_max) & (row_max < 0)
+        if invalid_rows.any():
+            attn_weights = torch.where(
+                invalid_rows,
+                torch.zeros_like(attn_weights),
+                attn_weights,
+            )
+
+        # Additional NaN/Inf sanitize to stabilize softmax on MPS
+        if torch.isnan(attn_weights).any() or torch.isinf(attn_weights).any():
+            print("DEBUG: NaN/Inf detected in attn_weights; sanitizing (LMS)")
+            attn_weights = torch.nan_to_num(
+                attn_weights,
+                nan=0.0,
+                posinf=1e4,
+                neginf=-1e4,
+            )
+        attn_weights = torch.clamp(attn_weights, -1e4, 1e4)
+
         # Softmax
         attn_weights = F.softmax(attn_weights, dim=-1)
         attn_weights = self.attn_dropout(attn_weights)
 
         # Weighted sum
         attn_output = torch.matmul(attn_weights, value)
+
+        # For debug to find Nan
+        if torch.isnan(attn_output).any():
+            print("DEBUG: NaN in attn_output at layer", self.layer_idx)
 
         # Reshape + projection
         attn_output = (

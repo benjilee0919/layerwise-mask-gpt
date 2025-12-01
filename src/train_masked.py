@@ -6,16 +6,70 @@ import os
 import json
 import torch
 import argparse
+import time
+import csv
+from transformers import TrainerCallback
 from transformers import (
     GPT2Tokenizer,
     TrainingArguments,
     Trainer,
-    DataCollatorForLanguageModeling,
+    default_data_collator,
 )
 from src.dataset import prepare_dataset
 from src.model.gpt2_custom import MaskedGPT2LMHeadModel
 from src.model.schedule import load_mask_schedule
 import logging
+
+class TimeLoggingCallback(TrainerCallback):
+    def __init__(self, log_path):
+        self.log_path = log_path
+        self.start_time = None
+        self.epoch_start = None
+        self._prepare_file()
+
+    def _prepare_file(self):
+        os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
+        with open(self.log_path, "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "step",
+                "epoch",
+                "step_time_sec",
+                "total_time_sec",
+                "loss",
+            ])
+
+    def on_step_begin(self, args, state, control, **kwargs):
+        self.start_time = time.time()
+
+    def on_step_end(self, args, state, control, logs=None, **kwargs):
+        step_time = time.time() - self.start_time
+        total_time = state.global_step * step_time
+
+        with open(self.log_path, "a", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                state.global_step,
+                state.epoch,
+                round(step_time, 4),
+                round(total_time, 2),
+                logs.get("loss") if logs else None,
+            ])
+
+def safe_data_collator(features):
+    """Collate function that skips any examples with empty tensors."""
+    cleaned = []
+    for f in features:
+        ids = f.get("input_ids", None)
+        labels = f.get("labels", None)
+        if isinstance(ids, torch.Tensor) and isinstance(labels, torch.Tensor):
+            if ids.numel() == 0 or labels.numel() == 0:
+                continue
+            cleaned.append(f)
+    # Fallback: if everything was filtered out, use the original batch
+    if not cleaned:
+        cleaned = features
+    return default_data_collator(cleaned)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -124,10 +178,7 @@ def main():
     datasets, _ = prepare_dataset(args.dataset, config["max_length"])
 
     # Data collator for causal language modeling
-    data_collator = DataCollatorForLanguageModeling(
-        tokenizer=tokenizer,
-        mlm=False,  # GPT-2 is causal LM, not masked LM
-    )
+    data_collator = safe_data_collator
 
     # NOTE: Your transformers version does not support newer arguments like
     # `evaluation_strategy`, `save_strategy`, `report_to`, etc.
@@ -145,6 +196,7 @@ def main():
         max_grad_norm=config["max_grad_norm"],
         logging_steps=config["logging_steps"],
         save_steps=config["save_steps"],
+        save_safetensors=False,
         # All newer/optional fields are omitted for compatibility:
         # - evaluation_strategy
         # - save_strategy
@@ -163,12 +215,17 @@ def main():
 
     # Initialize Trainer
     trainer = Trainer(
-        model=model,
-        args=training_args,
-        data_collator=data_collator,
-        train_dataset=datasets["train"],
-        eval_dataset=datasets["validation"],
-        tokenizer=tokenizer,
+    model=model,
+    args=training_args,
+    data_collator=data_collator,
+    train_dataset=datasets["train"],
+    eval_dataset=datasets["validation"],
+    tokenizer=tokenizer,
+    callbacks=[
+        TimeLoggingCallback(
+            log_path=f"./results/{args.schedule}_training_time.csv"
+            ),
+        ],
     )
 
     # Train model

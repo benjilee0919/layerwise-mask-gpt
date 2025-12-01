@@ -10,6 +10,7 @@ torchvision>=0.16.0
 transformers>=4.36.0
 datasets>=2.14.0
 tokenizers>=0.15.0
+accelerate>=0.26.0
 
 # ===== Data & Scientific =====
 numpy>=1.23.0
@@ -22,6 +23,7 @@ seaborn>=0.12.0
 
 # ===== Utility =====
 tqdm>=4.65.0
+
 
 # ===== Training / Logging =====
 tensorboard>=2.14.0
