@@ -363,7 +363,7 @@ class MaskedMultiHeadAttention(nn.Module):
 
         # Additional NaN/Inf sanitize to stabilize softmax on MPS
         if torch.isnan(attn_weights).any() or torch.isinf(attn_weights).any():
-            print("DEBUG: NaN/Inf detected in attn_weights; sanitizing (LMS)")
+            #print("DEBUG: NaN/Inf detected in attn_weights; sanitizing (LMS)")
             attn_weights = torch.nan_to_num(
                 attn_weights,
                 nan=0.0,
