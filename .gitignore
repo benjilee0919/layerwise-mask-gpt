@@ -1,4 +1,6 @@
-# ===== Python =====
+# ============================
+# Python bytecode
+# ============================
 __pycache__/
 *.pyc
 *.pyo
@@ -6,43 +8,50 @@ __pycache__/
 *.pkl
 *.bin
 
-# ===== Virtual Environment =====
+# ============================
+# Virtual Environments
+# ============================
 .venv/
 venv/
 env/
 
-# ===== OS =====
+# ============================
+# OS / Editor Files
+# ============================
 .DS_Store
 Thumbs.db
-
-# ===== Editor =====
 .vscode/
 .idea/
 
-# ===== HuggingFace cache =====
+# ============================
+# HuggingFace / Cache
+# ============================
 ~/.cache/huggingface/
 cache/
 datasets_cache/
-
-# ===== TensorBoard =====
-runs/
-
-# ===== Model checkpoints =====
-models/
-checkpoints/
-*.ckpt
-
-# ===== Data (local only) =====
-data/processed/
-data/raw/
 data/cache/
+
+# ============================
+# Raw / Processed Data (local only)
+# ============================
+data/
 *.arrow
 *.jsonl
 
-# ===== Logs =====
+# ============================
+# TensorBoard Logs
+# ============================
+runs/
 logs/
 *.log
 
-# ===== Generated =====
+# ============================
+# Local-only project folders (NOT uploaded to GitHub)
+# ============================
+notebooks/
 results/
-outputs/
+presentation/
+report/
+models/
+checkpoints/
+*.ckpt

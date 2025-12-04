@@ -1,5 +1,9 @@
 """
-Training script for baseline GPT-2 model without attention masking.
+Training script for a baseline GPT-2 model without attention masking.
+
+This script trains a standard GPT-2 model (full causal attention) using
+HuggingFace Trainer and logs both training loss and timing statistics
+for comparison against the LMS variant.
 """
 
 import os
@@ -24,6 +28,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class TimeLoggingCallback(TrainerCallback):
+    """
+    Trainer callback that logs per-step timing and loss values to a CSV file.
+    """
     def __init__(self, log_path):
         self.log_path = log_path
         self.start_time = None
@@ -52,7 +59,12 @@ class TimeLoggingCallback(TrainerCallback):
             ])
 
 def safe_data_collator(features):
-    """Collate function that skips any examples with empty tensors."""
+    """
+    Collate function that drops examples with empty tensors.
+
+    This is a defensive wrapper around the default data collator to
+    avoid crashes when a batch contains zero-length sequences.
+    """
     cleaned = []
     for f in features:
         ids = f.get("input_ids", None)
@@ -74,7 +86,13 @@ def load_config(config_path: str = "./config/train_config.json") -> dict:
 
 
 def setup_model_and_tokenizer(model_name: str = 'gpt2'):
-    """Initialize model and tokenizer."""
+    """
+    Initialize the GPT-2 language model and tokenizer.
+
+    The tokenizer's pad token is set to the EOS token, and the model's
+    token embeddings are resized accordingly to match the tokenizer
+    vocabulary size.
+    """
     tokenizer = GPT2Tokenizer.from_pretrained(model_name)
     tokenizer.pad_token = tokenizer.eos_token
     
@@ -87,6 +105,13 @@ def setup_model_and_tokenizer(model_name: str = 'gpt2'):
 
 
 def main():
+    """
+    Entry point for training the baseline GPT-2 model.
+
+    Parses command-line arguments, loads the training configuration,
+    initializes the model and tokenizer, prepares the dataset, and then
+    launches training and evaluation via HuggingFace Trainer.
+    """
     parser = argparse.ArgumentParser(description='Train baseline GPT-2 model')
     parser.add_argument('--dataset', type=str, default='tiny_stories',
                        choices=['wikitext-103', 'tiny_stories'],

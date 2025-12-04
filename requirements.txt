@@ -1,36 +1,18 @@
-# ===== Core =====
+# Core
 torch>=2.1.0
-torchvision>=0.16.0
-
-# Apple Silicon (M1/M2/M3/M4) will auto-detect mps
-# If using CUDA on Linux/Windows install matching wheels:
-# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
-
-# ===== HuggingFace =====
 transformers>=4.36.0
 datasets>=2.14.0
 tokenizers>=0.15.0
-accelerate>=0.26.0
 
-# ===== Data & Scientific =====
+# Scientific stack
 numpy>=1.23.0
 pandas>=1.5.0
 scipy>=1.10.0
 
-# ===== Visualization =====
+# Visualization
 matplotlib>=3.7.0
 seaborn>=0.12.0
 
-# ===== Utility =====
+# Utilities
 tqdm>=4.65.0
-
-
-# ===== Training / Logging =====
 tensorboard>=2.14.0
-
-# ===== Optional: profiling =====
-psutil>=5.9.0
-
-# ===== Notebook support =====
-jupyter>=1.0.0
-ipykernel>=6.26.0

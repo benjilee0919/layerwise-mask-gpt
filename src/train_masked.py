@@ -1,5 +1,8 @@
 """
-Training script for GPT-2 model with layer-wise attention masking.
+Training script for a GPT-2 model with layer-wise attention masking (LMS).
+
+This script trains a masked GPT-2 variant using a specified layer-wise
+mask schedule and logs both training loss and timing statistics.
 """
 
 import os
@@ -21,6 +24,9 @@ from src.model.schedule import load_mask_schedule
 import logging
 
 class TimeLoggingCallback(TrainerCallback):
+    """
+    Trainer callback that logs per-step timing and loss values to a CSV file.
+    """
     def __init__(self, log_path):
         self.log_path = log_path
         self.start_time = None
@@ -57,7 +63,12 @@ class TimeLoggingCallback(TrainerCallback):
             ])
 
 def safe_data_collator(features):
-    """Collate function that skips any examples with empty tensors."""
+    """
+    Collate function that drops examples with empty tensors.
+
+    This is a defensive wrapper around the default data collator to
+    avoid crashes when a batch contains zero-length sequences.
+    """
     cleaned = []
     for f in features:
         ids = f.get("input_ids", None)
@@ -103,6 +114,13 @@ def setup_masked_model_and_tokenizer(
 
 
 def main():
+    """
+    Entry point for training a masked GPT-2 model with a given schedule.
+
+    Parses command-line arguments, loads configuration and mask schedule,
+    initializes the model and tokenizer, prepares the dataset, and then
+    launches training and evaluation via HuggingFace Trainer.
+    """
     parser = argparse.ArgumentParser(description="Train masked GPT-2 model")
     parser.add_argument(
         "--dataset",
@@ -180,9 +198,11 @@ def main():
     # Data collator for causal language modeling
     data_collator = safe_data_collator
 
-    # NOTE: Your transformers version does not support newer arguments like
-    # `evaluation_strategy`, `save_strategy`, `report_to`, etc.
-    # To keep it compatible, we only pass a minimal, safe subset of arguments.
+    # NOTE:
+    # This project targets a transformers version that does not support newer
+    # TrainingArguments fields such as `evaluation_strategy`, `save_strategy`,
+    # `report_to`, etc. To maintain compatibility, only a minimal, widely
+    # supported subset of arguments is passed here.
     training_args = TrainingArguments(
         output_dir=args.output_dir,
         overwrite_output_dir=True,

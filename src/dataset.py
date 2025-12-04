@@ -1,5 +1,9 @@
 """
 Dataset loading and preprocessing utilities for WikiText-103 and TinyStories.
+
+Note:
+Although WikiText-103 loading is supported, all experiments in this project
+use TinyStories exclusively. The WikiText loader is retained for completeness.
 """
 
 import os
@@ -70,15 +74,16 @@ def load_tinystories(cache_dir: str = "./data/processed") -> Dict[str, Any]:
     """
     Load TinyStories dataset.
 
-    ⚠️ 주의:
-    - Windows + OneDrive + 한글 경로에서 로컬 cache_dir를 쓰면
-      경로가 너무 길어져서 .arrow 파일 생성 시 FileNotFoundError가 날 수 있어서
-      여기서는 HuggingFace 기본 캐시(~/.cache/huggingface/datasets)를 쓰도록 둔다.
+    Note:
+    On some systems (e.g., Windows with OneDrive or very long file paths),
+    using a local cache_dir may produce path-length issues when HuggingFace
+    attempts to create .arrow files. To avoid this, the default HuggingFace
+    dataset cache (~/.cache/huggingface/datasets) is used.
     """
     print("Loading TinyStories dataset...")
     
-    # cache_dir는 받기만 하고 실제로는 넘기지 않는다.
-    # (HF 기본 캐시 사용)
+    # cache_dir is accepted for API consistency but not used.
+    # TinyStories is always loaded using the default HuggingFace cache.
     dataset = load_dataset("roneneldan/TinyStories")
     
     # Use a subset for faster experiments
@@ -111,7 +116,7 @@ def prepare_dataset(
     if dataset_name.lower() == "wikitext-103":
         data = load_wikitext103(cache_dir)
     elif dataset_name.lower() == "tiny_stories":
-        # TinyStories는 HF 기본 캐시 사용 (cache_dir 미사용)
+        # TinyStories uses the default HuggingFace cache (cache_dir is unused).
         data = load_tinystories()
     else:
         raise ValueError(f"Unknown dataset: {dataset_name}")
@@ -223,7 +228,7 @@ def main():
     print(f"Attention mask shape: {batch['attention_mask'].shape}")
     print(f"Labels shape: {batch['labels'].shape}")
     
-    # Show sample text
+    # Display a sample decoded text snippet for verification
     sample_ids = batch["input_ids"][0][:50]  # First 50 tokens
     sample_text = tokenizer.decode(sample_ids, skip_special_tokens=True)
     print(f"\nSample text: {sample_text}")
