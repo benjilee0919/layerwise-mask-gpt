@@ -1,9 +1,7 @@
 # Layer-wise Mask Scheduling in GPT-2
 
 This repository contains the code for my final project in **EN.705.743 — ChatGPT from Scratch**.  
-The goal of the project was to investigate whether **Layer-wise Mask Scheduling (LMS)**  
-— applying different attention window sizes at different transformer layers —  
-can improve the efficiency of GPT-2 in plain PyTorch.
+The goal of the project was to investigate whether **Layer-wise Mask Scheduling (LMS)** — applying different attention window sizes at different transformer layers — can improve the efficiency of GPT-2 in plain PyTorch.
 
 The key takeaway is a **negative but very informative result**:
 mask-based sparsity in PyTorch provides only *logical* sparsity, not *compute* sparsity.
@@ -35,11 +33,9 @@ As a result, the LMS model is both **slower** and **less accurate** than the bas
   - Others use narrow (e.g., 128-token) windows.
 
 - **Logical vs. Compute Sparsity**  
-  - *Logical sparsity*: masks tell the model which positions to ignore,  
-    but the dense attention matrix is still fully computed.
+  - *Logical sparsity*: masks tell the model which positions to ignore, but the dense attention matrix is still fully computed.
   - *Compute sparsity*: the underlying kernel avoids computing masked positions.  
-    This requires CUDA/Triton/FlashAttention-style kernels and is **not** provided by
-    vanilla PyTorch attention.
+  - This requires CUDA/Triton/FlashAttention-style kernels and is **not** provided byvanilla PyTorch attention.
 
 - **Outcome**  
   - LMS **increased** eval loss (worse perplexity).  
@@ -71,9 +67,6 @@ layerwise-mask-gpt/
 │       ├── schedule.py          # Schedule loading / parsing
 │       └── __init__.py
 │
-├── config/
-│   ├── train_config.json        # Training hyperparameters for both models
-│   └── schedule_config.json     # Mask schedule definitions (full, half, quarter, lms_main, ...)
 ├── models/                      # (Local only) model checkpoints — ignored by .gitignore
 ├── results/                     # (Local only) logs and metrics — ignored by .gitignore
 ├── notebooks/                   # (Local only) analysis notebooks — ignored by .gitignore
@@ -83,10 +76,8 @@ layerwise-mask-gpt/
 └── installation.txt             # Installation instructions
 ```
 
-> Note: The folders (`models/`, `results/`, `notebooks/`, `presentation/`, `report/`)
-> are *local-only* and intentionally ignored by `.gitignore`.  
-> They are used during development, experimentation, and course submission,
-> but are not uploaded to GitHub to keep the repository lightweight.
+> Note: The folders (`models/`, `results/`, `notebooks/`, `presentation/`, `report/`) are *local-only* and intentionally ignored by `.gitignore`.  
+> They are used during development, experimentation, and course submission, but are not uploaded to GitHub to keep the repository lightweight.
 
 ---
 
@@ -139,10 +130,8 @@ but the **final results in the report and slides use only `lms_main`.**
 
 After training:
 
-- The training scripts write evaluation metrics (e.g., `eval_loss`,
-  `eval_samples_per_second`) into `test_results.json` inside the model output dirs.
-- Additional analysis (loss curves, speed plots) is done in local notebooks
-  under `notebooks/` using those JSON logs.
+- The training scripts write evaluation metrics (e.g., `eval_loss`, `eval_samples_per_second`) into `test_results.json` inside the model output dirs.
+- Additional analysis (loss curves, speed plots) is done in local notebooks under `notebooks/` using those JSON logs.
 
 ---
 
@@ -170,8 +159,7 @@ All results are reported on TinyStories with GPT-2 Small, 2 epochs, batch size 8
   - LMS: ~**9,378 s**  
   → About **50% longer** training time.
 
-These numbers clearly show that LMS, as implemented with PyTorch masking,
-does **not** improve efficiency and instead makes things worse.
+These numbers clearly show that LMS, as implemented with PyTorch masking, does **not** improve efficiency and instead makes things worse.
 
 ---
 
@@ -186,18 +174,14 @@ The main lessons from this project are:
    Smaller attention windows without kernel changes simply reduce model capacity.
 
 3. **Real speedups require kernel-level sparse attention.**  
-   To exploit structured sparsity, the attention kernels themselves must be
-   designed to skip masked positions (e.g., FlashAttention/Triton-style kernels).
+   To exploit structured sparsity, the attention kernels themselves must be designed to skip masked positions (e.g., FlashAttention/Triton-style kernels).
 
 4. **Negative results are informative.**  
-   This project clarifies why mask-only approaches are insufficient and where
-   future work must focus to make sparse transformers practical.
+   This project clarifies why mask-only approaches are insufficient and where future work must focus to make sparse transformers practical.
 
 ---
 
 ## 8. Acknowledgments
 
-- This project was completed as part of  
-  **EN.705.743 — ChatGPT from Scratch** at Johns Hopkins University.
-- Many components (GPT-2, training utilities) are built on top of  
-  the excellent **HuggingFace Transformers** and **PyTorch** ecosystems.
+- This project was completed as part of **EN.705.743 — ChatGPT from Scratch** at Johns Hopkins University.
+- Many components (GPT-2, training utilities) are built on top of the excellent **HuggingFace Transformers** and **PyTorch** ecosystems.
