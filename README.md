@@ -183,5 +183,6 @@ The main lessons from this project are:
 
 ## 8. Acknowledgments
 
-- This project was completed as part of **EN.705.743 — ChatGPT from Scratch** at Johns Hopkins University.
-- Many components (GPT-2, training utilities) are built on top of the excellent **HuggingFace Transformers** and **PyTorch** ecosystems.
+- This work was built using the **PyTorch** and **HuggingFace Transformers** ecosystems, which provided the foundation for model training, tokenization, and experimentation.
+
+- The project also draws inspiration from recent work on sparse attention and efficient transformer architectures.
